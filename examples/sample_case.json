@@ -1,0 +1,15 @@
+{
+  "series": [
+    10,
+    11,
+    10,
+    12,
+    11,
+    50
+  ],
+  "tasks": [
+    "next-value moving-average forecast",
+    "rolling anomaly detection"
+  ],
+  "note": "synthetic series"
+}
