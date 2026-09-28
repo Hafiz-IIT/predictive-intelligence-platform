@@ -1,0 +1,14 @@
+[build-system]
+requires=["setuptools>=68"]
+build-backend="setuptools.build_meta"
+
+[project]
+name="predictive-intelligence-platform"
+version="0.1.0"
+description="Transparent baseline forecasting and anomaly-detection toolkit for numeric time-series intelligence."
+requires-python=">=3.10"
+license={text="MIT"}
+authors=[{name="Syed Hafiz Ali"}]
+
+[tool.setuptools]
+py-modules=["predictive_intelligence_platform"]

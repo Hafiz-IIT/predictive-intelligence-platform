@@ -1,16 +1,15 @@
 # Predictive Intelligence Platform
 
-> **Transparent forecasting and anomaly-detection baselines before the word ‘AI’ hides the assumptions.**
+> Transparent baseline forecasting and anomaly-detection toolkit for numeric time-series intelligence.
 
-Many predictive-system concepts jump straight to complex models without a reproducible baseline. This repository keeps forecasting and anomaly detection deliberately transparent so future ML methods must demonstrate measurable improvement.
+## Status
+**Reproducible prototype** with executable code, tests, CI, architecture, evaluation and roadmap documentation.
 
-## Implemented
-- moving-average forecast
-- exponential smoothing
-- rolling z-score anomaly detection
-- zero-variance anomaly handling
-- mean absolute error evaluation
-- input validation
+## Problem
+Prediction projects need strong transparent baselines before complex ML claims. This repo provides inspectable statistical forecasts, smoothing and anomaly detection.
+
+## Architecture
+Numeric series → moving-average / exponential-smoothing baseline → rolling anomaly detector → error metrics and event report.
 
 ## Run
 ```bash
@@ -18,23 +17,27 @@ python -m unittest discover -s tests -v
 python predictive_intelligence_platform.py
 ```
 
-## Repository map
-- `predictive_intelligence_platform.py` — implementation
-- `tests/` — tests
-- `examples/` — example input
-- `docs/architecture.md` — architecture
-- `docs/research-agenda.md` — experiments + research lineage
-- `STATUS.md` — claims boundary
-- `CITATION.cff` — citation
-
-## Pipeline
-**numeric series → baseline forecast/smoothing → rolling history → anomaly score → evaluation**
+## Implemented
+- Moving-average forecast
+- Exponential smoothing
+- Rolling z-score anomalies
+- MAE metric
+- Deterministic anomaly records
+- Tests and CI
 
 ## Research lineage
-This repo comes from the older Predictive Intelligence Platform, trade forecasting, risk/anomaly detection, city prediction, and operational analytics ideas.
+- *User Behavior Modeling with Adaptive Feedback Loops*
+- *AI for Climate Change: Modeling Micro-Level Energy Efficiency*
+- *Reinforcement-Driven Optimization in Industrial AI*
 
-## Evaluation direction
-Benchmark the baselines on synthetic trend/seasonality/shift/outlier series, then compare future learned models against the same frozen splits and metrics.
+## Evaluation
+Tests verify baseline arithmetic and injected anomaly behavior; future work should add backtesting and uncertainty intervals.
 
-## Maturity
-**Research prototype.** These are statistical baselines, not a production forecasting service, not a trained AI platform, and not evidence of predictive performance on a real business domain.
+## Limitations
+- Univariate baselines
+- No domain-specific data
+- No neural forecasting model
+- No production serving layer
+
+## License
+MIT.
