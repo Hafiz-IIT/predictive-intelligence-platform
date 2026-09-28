@@ -41,3 +41,7 @@ Tests verify baseline arithmetic and injected anomaly behavior; future work shou
 
 ## License
 MIT.
+
+## Extended implementation
+
+- `backtest.py` adds walk-forward moving-average evaluation and window comparison using MAE.
