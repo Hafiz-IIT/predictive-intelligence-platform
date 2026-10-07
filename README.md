@@ -1,47 +1,46 @@
 # Predictive Intelligence Platform
 
-> Transparent baseline forecasting and anomaly-detection toolkit for numeric time-series intelligence.
+<p align="center"><strong>Transparent Forecasting Before Complex ML</strong><br/><sub>Baselines, walk-forward evaluation and anomaly detection for numeric time series.</sub></p>
 
-## Status
-**Reproducible prototype** with executable code, tests, CI, architecture, evaluation and roadmap documentation.
+<p align="center"><img src="https://img.shields.io/badge/status-reproducible%20prototype-blue" alt="Prototype"/> <img src="https://img.shields.io/badge/focus-time--series-orange" alt="Time series"/></p>
 
-## Problem
-Prediction projects need strong transparent baselines before complex ML claims. This repo provides inspectable statistical forecasts, smoothing and anomaly detection.
+## Question
 
-## Architecture
-Numeric series → moving-average / exponential-smoothing baseline → rolling anomaly detector → error metrics and event report.
+**What can a simple, inspectable forecasting baseline establish before a project reaches for a complex model?**
 
-## Run
-```bash
-python -m unittest discover -s tests -v
-python predictive_intelligence_platform.py
+```
+Time series
+   ↓
+Moving average / smoothing
+   ↓
+Walk-forward evaluation
+   ↓
+MAE comparison
+   +
+Rolling anomaly detection
 ```
 
+## Try it
+
+```bash
+python predictive_intelligence_platform.py
+python -m unittest discover -s tests -v
+```
+
+`backtest.py` adds walk-forward evaluation and automatic comparison of forecast windows.
+
 ## Implemented
-- Moving-average forecast
-- Exponential smoothing
-- Rolling z-score anomalies
+
+- moving-average forecast
+- exponential smoothing
+- rolling z-score anomalies
 - MAE metric
-- Deterministic anomaly records
-- Tests and CI
+- walk-forward backtesting
+- window comparison
+- deterministic CI
 
-## Research lineage
-- *User Behavior Modeling with Adaptive Feedback Loops*
-- *AI for Climate Change: Modeling Micro-Level Energy Efficiency*
-- *Reinforcement-Driven Optimization in Industrial AI*
+## Research boundary
 
-## Evaluation
-Tests verify baseline arithmetic and injected anomaly behavior; future work should add backtesting and uncertainty intervals.
+Baseline forecasting toolkit only. No claim of predictive superiority or production forecasting accuracy.
 
-## Limitations
-- Univariate baselines
-- No domain-specific data
-- No neural forecasting model
-- No production serving layer
-
-## License
-MIT.
-
-## Extended implementation
-
-- `backtest.py` adds walk-forward moving-average evaluation and window comparison using MAE.
+Related: [Privacy-Aware Recommender Lab](https://github.com/Hafiz-IIT/privacy-aware-recommender-lab)
