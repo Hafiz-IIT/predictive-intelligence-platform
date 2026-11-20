@@ -5,10 +5,11 @@ from math import isfinite, sqrt
 
 
 def _finite_series(values: list[float], name: str = "values") -> list[float]:
-    try:
-        converted = [float(value) for value in values]
-    except (TypeError, ValueError):
-        raise ValueError(f"{name} must contain finite numbers") from None
+    if not isinstance(values, (list, tuple)) or not values:
+        raise ValueError(f"{name} must be a non-empty list or tuple")
+    if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in values):
+        raise ValueError(f"{name} must contain numeric values")
+    converted = [float(value) for value in values]
     if not all(isfinite(value) for value in converted):
         raise ValueError(f"{name} must contain finite numbers")
     return converted
@@ -48,8 +49,8 @@ class Anomaly:
 
 def rolling_anomalies(values: list[float], *, window: int = 5, threshold: float = 3.0) -> list[Anomaly]:
     _positive_int(window, "window", minimum=2)
-    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not isfinite(threshold) or threshold < 0:
-        raise ValueError("threshold must be finite and non-negative")
+    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not isfinite(threshold) or threshold <= 0:
+        raise ValueError("threshold must be finite and positive")
     data = _finite_series(values)
     out: list[Anomaly] = []
     for i in range(window, len(data)):
