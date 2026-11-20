@@ -104,7 +104,12 @@ def mae(actual: list[float], predicted: list[float]) -> float:
     errors = [abs(a - p) for a, p in zip(actual_data, predicted_data)]
     if any(not isfinite(error) for error in errors):
         raise OverflowError("absolute prediction error is outside finite numeric range")
-    return fsum(errors) / len(errors)
+    scale = max(errors)
+    if scale == 0:
+        return 0.0
+    # Normalize before summing: fsum(errors) can overflow even when the
+    # arithmetic mean itself is representable (for example, two 1e308 errors).
+    return scale * (fsum(error / scale for error in errors) / len(errors))
 
 
 if __name__ == "__main__":
