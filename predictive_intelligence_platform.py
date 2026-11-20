@@ -9,7 +9,10 @@ def _finite_series(values: list[float], name: str = "values") -> list[float]:
         raise ValueError(f"{name} must be a non-empty list or tuple")
     if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in values):
         raise ValueError(f"{name} must contain numeric values")
-    converted = [float(value) for value in values]
+    try:
+        converted = [float(value) for value in values]
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must contain finite numbers") from exc
     if not all(isfinite(value) for value in converted):
         raise ValueError(f"{name} must contain finite numbers")
     return converted
@@ -36,7 +39,13 @@ def exponential_smoothing(values: list[float], alpha: float) -> float:
     data = _finite_series(values)
     if not data:
         raise ValueError("values required")
-    if isinstance(alpha, bool) or not isinstance(alpha, (int, float)) or not isfinite(alpha) or not 0 < alpha <= 1:
+    if isinstance(alpha, bool) or not isinstance(alpha, (int, float)):
+        raise ValueError("alpha must be finite and in (0, 1]")
+    try:
+        alpha = float(alpha)
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise ValueError("alpha must be finite and in (0, 1]") from exc
+    if not isfinite(alpha) or not 0 < alpha <= 1:
         raise ValueError("alpha must be finite and in (0, 1]")
     level = data[0]
     for value in data[1:]:
@@ -53,7 +62,13 @@ class Anomaly:
 
 def rolling_anomalies(values: list[float], *, window: int = 5, threshold: float = 3.0) -> list[Anomaly]:
     _positive_int(window, "window", minimum=2)
-    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not isfinite(threshold) or threshold <= 0:
+    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)):
+        raise ValueError("threshold must be finite and positive")
+    try:
+        threshold = float(threshold)
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise ValueError("threshold must be finite and positive") from exc
+    if not isfinite(threshold) or threshold <= 0:
         raise ValueError("threshold must be finite and positive")
     data = _finite_series(values)
     out: list[Anomaly] = []
@@ -68,9 +83,13 @@ def rolling_anomalies(values: list[float], *, window: int = 5, threshold: float 
             mean_scaled = fsum(scaled) / window
             variance_scaled = fsum((value - mean_scaled) ** 2 for value in scaled) / window
             std_scaled = sqrt(variance_scaled)
-        current_scaled = 0.0 if scale == 0 else data[i] / scale
+        current_scaled = data[i] / scale if scale else 0.0
+        # A nonzero observation after an all-zero history is a zero-variance outlier.
         # Scaling avoids overflow when finite measurements approach float limits.
-        z = None if std_scaled == 0 and current_scaled != mean_scaled else (0.0 if std_scaled == 0 else (current_scaled - mean_scaled) / std_scaled)
+        if std_scaled == 0:
+            z = None if (data[i] != 0.0 if scale == 0 else current_scaled != mean_scaled) else 0.0
+        else:
+            z = (current_scaled - mean_scaled) / std_scaled
         if z is None or abs(z) >= threshold:
             out.append(Anomaly(i, data[i], z))
     return out
