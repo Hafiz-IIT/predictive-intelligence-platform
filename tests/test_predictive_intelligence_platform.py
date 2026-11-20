@@ -43,6 +43,11 @@ class PredictivePlatformTests(unittest.TestCase):
         self.assertEqual(anomalies[0].index, 5)
         self.assertIsNone(anomalies[0].z_score)
 
+    def test_extreme_candidate_to_history_ratio_never_emits_infinite_z_score(self):
+        anomalies = rolling_anomalies([1e-308, 1e-308, 1e-308, 1e-308, 1e-308, 1e308], window=5)
+        self.assertEqual(len(anomalies), 1)
+        self.assertIsNone(anomalies[0].z_score)
+
     def test_extremely_large_integer_inputs_are_rejected_cleanly(self):
         huge = 10 ** 10000
         with self.assertRaises(ValueError):
