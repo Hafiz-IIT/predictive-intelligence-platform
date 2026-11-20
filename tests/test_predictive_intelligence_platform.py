@@ -15,6 +15,23 @@ class PredictivePlatformTests(unittest.TestCase):
         anomalies = rolling_anomalies([10, 10, 10, 10, 10, 50], window=5, threshold=3)
         self.assertEqual([a.index for a in anomalies], [5])
 
+    def test_invalid_windows_and_nonfinite_values_are_rejected(self):
+        with self.assertRaises(ValueError):
+            moving_average_forecast([1, 2], 1.5)
+        with self.assertRaises(ValueError):
+            rolling_anomalies([1, 2, 3], window=2, threshold=-1)
+        with self.assertRaises(ValueError):
+            exponential_smoothing([1, float("nan")], 0.5)
+
+    def test_zero_variance_outlier_has_no_infinite_z_score(self):
+        anomalies = rolling_anomalies([5, 5, 5, 5, 5, 10], window=5)
+        self.assertEqual(len(anomalies), 1)
+        self.assertIsNone(anomalies[0].z_score)
+
+    def test_mae_rejects_nonfinite_values(self):
+        with self.assertRaises(ValueError):
+            mae([1, float("inf")], [1, 2])
+
     def test_mae(self):
         self.assertEqual(mae([1, 2], [2, 2]), 0.5)
 
