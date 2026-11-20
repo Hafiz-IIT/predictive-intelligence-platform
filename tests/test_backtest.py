@@ -9,6 +9,16 @@ class BacktestTests(unittest.TestCase):
         self.assertEqual(result["indices"], [2, 3, 4])
         self.assertEqual(len(result["actual"]), len(result["predicted"]))
 
+    def test_invalid_backtest_windows_and_values_rejected(self):
+        with self.assertRaises(ValueError):
+            walk_forward_moving_average([1, 2, 3, 4], window=True)
+        with self.assertRaises(ValueError):
+            walk_forward_moving_average([1, 2, 3, 4], window=1, min_train=0)
+        with self.assertRaises(ValueError):
+            compare_windows([1, 2, 3, 4], [1, 1])
+        with self.assertRaises(ValueError):
+            compare_windows([1, float("nan"), 3, 4], [1])
+
     def test_window_comparison_sorted_by_mae(self):
         rows = compare_windows([1, 2, 3, 4, 5, 6], [1, 2, 3])
         self.assertLessEqual(rows[0]["mae"], rows[-1]["mae"])
