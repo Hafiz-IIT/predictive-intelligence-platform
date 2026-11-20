@@ -32,6 +32,15 @@ class PredictivePlatformTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             mae([1, float("inf")], [1, 2])
 
+    def test_extreme_finite_series_uses_stable_scaling(self):
+        self.assertEqual(moving_average_forecast([1e308, 1e308], 2), 1e308)
+        anomalies = rolling_anomalies([1e308, 1e308, 1e308, 1e308, 1e308, -1e308], window=5)
+        self.assertEqual(len(anomalies), 1)
+
+    def test_mae_rejects_unrepresentable_difference(self):
+        with self.assertRaises(OverflowError):
+            mae([1e308], [-1e308])
+
     def test_mae(self):
         self.assertEqual(mae([1, 2], [2, 2]), 0.5)
 
