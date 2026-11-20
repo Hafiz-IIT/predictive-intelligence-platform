@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import isfinite, sqrt
+from math import fsum, isfinite, sqrt
 
 
 def _finite_series(values: list[float], name: str = "values") -> list[float]:
@@ -25,7 +25,11 @@ def moving_average_forecast(values: list[float], window: int) -> float:
     data = _finite_series(values)
     if len(data) < window:
         raise ValueError("not enough values for window")
-    return sum(data[-window:]) / window
+    sample = data[-window:]
+    scale = max(abs(value) for value in sample)
+    if scale == 0:
+        return 0.0
+    return scale * (fsum(value / scale for value in sample) / window)
 
 
 def exponential_smoothing(values: list[float], alpha: float) -> float:
@@ -55,11 +59,18 @@ def rolling_anomalies(values: list[float], *, window: int = 5, threshold: float 
     out: list[Anomaly] = []
     for i in range(window, len(data)):
         history = data[i-window:i]
-        mean = sum(history) / window
-        variance = sum((x - mean) ** 2 for x in history) / window
-        std = sqrt(variance)
-        # A z-score is undefined when historical variance is zero.
-        z = None if std == 0 and data[i] != mean else (0.0 if std == 0 else (data[i] - mean) / std)
+        scale = max(abs(value) for value in history)
+        if scale == 0:
+            mean_scaled = 0.0
+            std_scaled = 0.0
+        else:
+            scaled = [value / scale for value in history]
+            mean_scaled = fsum(scaled) / window
+            variance_scaled = fsum((value - mean_scaled) ** 2 for value in scaled) / window
+            std_scaled = sqrt(variance_scaled)
+        current_scaled = 0.0 if scale == 0 else data[i] / scale
+        # Scaling avoids overflow when finite measurements approach float limits.
+        z = None if std_scaled == 0 and current_scaled != mean_scaled else (0.0 if std_scaled == 0 else (current_scaled - mean_scaled) / std_scaled)
         if z is None or abs(z) >= threshold:
             out.append(Anomaly(i, data[i], z))
     return out
@@ -70,7 +81,10 @@ def mae(actual: list[float], predicted: list[float]) -> float:
     predicted_data = _finite_series(predicted, "predicted")
     if len(actual_data) != len(predicted_data) or not actual_data:
         raise ValueError("equal non-empty series required")
-    return sum(abs(a - p) for a, p in zip(actual_data, predicted_data)) / len(actual_data)
+    errors = [abs(a - p) for a, p in zip(actual_data, predicted_data)]
+    if any(not isfinite(error) for error in errors):
+        raise OverflowError("absolute prediction error is outside finite numeric range")
+    return fsum(errors) / len(errors)
 
 
 if __name__ == "__main__":
