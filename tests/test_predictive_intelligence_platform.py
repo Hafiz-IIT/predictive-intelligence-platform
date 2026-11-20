@@ -37,6 +37,21 @@ class PredictivePlatformTests(unittest.TestCase):
         anomalies = rolling_anomalies([1e308, 1e308, 1e308, 1e308, 1e308, -1e308], window=5)
         self.assertEqual(len(anomalies), 1)
 
+    def test_zero_baseline_outlier_is_detected(self):
+        anomalies = rolling_anomalies([0, 0, 0, 0, 0, 1], window=5)
+        self.assertEqual(len(anomalies), 1)
+        self.assertEqual(anomalies[0].index, 5)
+        self.assertIsNone(anomalies[0].z_score)
+
+    def test_extremely_large_integer_inputs_are_rejected_cleanly(self):
+        huge = 10 ** 10000
+        with self.assertRaises(ValueError):
+            moving_average_forecast([1, huge], 1)
+        with self.assertRaises(ValueError):
+            exponential_smoothing([1, 2], huge)
+        with self.assertRaises(ValueError):
+            rolling_anomalies([1, 2, 3], window=2, threshold=huge)
+
     def test_mae_rejects_unrepresentable_difference(self):
         with self.assertRaises(OverflowError):
             mae([1e308], [-1e308])
