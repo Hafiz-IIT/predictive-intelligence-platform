@@ -57,6 +57,9 @@ class PredictivePlatformTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             rolling_anomalies([1, 2, 3], window=2, threshold=huge)
 
+    def test_mae_avoids_sum_overflow_when_mean_is_representable(self):
+        self.assertEqual(mae([0.0, 0.0], [1e308, 1e308]), 1e308)
+
     def test_mae_rejects_unrepresentable_difference(self):
         with self.assertRaises(OverflowError):
             mae([1e308], [-1e308])
