@@ -74,22 +74,23 @@ def rolling_anomalies(values: list[float], *, window: int = 5, threshold: float 
     out: list[Anomaly] = []
     for i in range(window, len(data)):
         history = data[i-window:i]
-        scale = max(abs(value) for value in history)
+        # Include the candidate in the scale so current/history ratios stay bounded.
+        scale = max(max(abs(value) for value in history), abs(data[i]))
         if scale == 0:
             mean_scaled = 0.0
             std_scaled = 0.0
+            current_scaled = 0.0
         else:
             scaled = [value / scale for value in history]
             mean_scaled = fsum(scaled) / window
             variance_scaled = fsum((value - mean_scaled) ** 2 for value in scaled) / window
             std_scaled = sqrt(variance_scaled)
-        current_scaled = data[i] / scale if scale else 0.0
-        # A nonzero observation after an all-zero history is a zero-variance outlier.
-        # Scaling avoids overflow when finite measurements approach float limits.
-        if std_scaled == 0:
-            z = None if (data[i] != 0.0 if scale == 0 else current_scaled != mean_scaled) else 0.0
-        else:
-            z = (current_scaled - mean_scaled) / std_scaled
+            current_scaled = data[i] / scale
+        # A nonzero observation after a zero-variance history is represented by None,
+        # not infinity, so result artifacts remain valid JSON.
+        z = None if std_scaled == 0 and current_scaled != mean_scaled else (
+            0.0 if std_scaled == 0 else (current_scaled - mean_scaled) / std_scaled
+        )
         if z is None or abs(z) >= threshold:
             out.append(Anomaly(i, data[i], z))
     return out
